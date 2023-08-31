@@ -66,5 +66,6 @@
     <string name="error_read_file">Error al leer el archivo</string>
     <string name="error_file">Error con el archivo</string>
     <string name="exit_app">Desea salir del app?</string>
+    <string name="menu_search">Busqueda</string>
 
 </resources>

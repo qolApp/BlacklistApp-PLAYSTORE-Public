@@ -17,4 +17,14 @@
         android:title="Filtrar"
         android:visible="false"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_search"
+        android:layout_width="wrap_content"
+        android:icon="@drawable/ic_search"
+        android:orderInCategory="400"
+        android:title="@string/menu_search"
+        android:visible="false"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom" />
 </menu>

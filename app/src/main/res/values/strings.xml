@@ -68,5 +68,6 @@
     <string name="error_file">Error with the file</string>
 
     <string name="exit_app">Do you want to exit?</string>
+    <string name="menu_search">Search</string>
 
 </resources>

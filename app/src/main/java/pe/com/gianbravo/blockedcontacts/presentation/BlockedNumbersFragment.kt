@@ -1,5 +1,6 @@
 package pe.com.gianbravo.blockedcontacts.presentation
 
+import android.app.SearchManager
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -13,6 +14,7 @@ import android.view.*
 import android.widget.CompoundButton
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
@@ -253,6 +255,24 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
                 menu.findItem(R.id.action_caller).apply{
                     isVisible = true
                 }
+                menu.findItem(R.id.action_search).apply{
+                    isVisible = true
+                    val searchManager = activity?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
+                    val searchView = this.actionView as SearchView
+                    searchView.setOnLongClickListener { true }
+                    searchView.setSearchableInfo(searchManager.getSearchableInfo(activity?.componentName))
+                    searchView.setOnQueryTextListener(object :
+                        SearchView.OnQueryTextListener {
+                        override fun onQueryTextSubmit(query: String?): Boolean {
+                            return false
+                        }
+
+                        override fun onQueryTextChange(newText: String?): Boolean {
+                            rvAdapter.filter.filter(newText)
+                            return false
+                        }
+                    })
+                }
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -293,7 +313,7 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
     }
 
     private fun refreshList() {
-        rvAdapter.loadData(getBlocked())
+        tvCount.text = rvAdapter.loadData(getBlocked()).toString()
     }
 
     private fun getBlocked(): ArrayList<String> {

@@ -52,11 +52,12 @@ class RvNumberListAdapter(
         listItems = ArrayList()
     }
 
-    fun loadData(listClient: ArrayList<String>?) {
+    fun loadData(listClient: ArrayList<String>?): Int {
         listClient?.let {
             this.listItems = it
             filter.filter("")
         }
+        return listClient?.size ?: 0
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataClientViewHolder {
