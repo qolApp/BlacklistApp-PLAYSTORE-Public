@@ -1,5 +1,6 @@
 package pe.com.gianbravo.blockedcontacts.presentation
 
+import android.Manifest
 import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
@@ -55,6 +56,17 @@ class DialerActivity : BaseActivity() {
             }
         }
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { isGranted: Map<String, Boolean> ->
+            if (!isGranted.containsValue(false)) {
+                initViews()
+            } else {
+                finish()
+            }
+        }
+
     private val settingsRegisterForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { uri ->
             if (uri != null) {
@@ -77,16 +89,34 @@ class DialerActivity : BaseActivity() {
 
     private fun setupPermissionsAndSettings() {
         this.let {
-            if (Utils.hasStoragePermission(this)) {
-                // Already have permission, do the thing
-                initViews()
-            } else {
-                // Do not have permissions, request them now
-                Utils.requestStoragePermission(
-                    this,
-                    REQUEST_PERMISSION_MEDIA
-                )
-            }
+//            if (Utils.hasStoragePermission(this)) {
+//                // Already have permission, do the thing
+//                initViews()
+//            } else {
+//                // Do not have permissions, request them now
+//                //Utils.requestStoragePermission(
+//                //   this,
+//                //   REQUEST_PERMISSION_MEDIA
+//                // )
+//                if (SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                    requestPermissionLauncher.launch(
+//                        arrayOf(
+//                        //    Manifest.permission.READ_MEDIA_AUDIO,
+//                         //   Manifest.permission.READ_MEDIA_VIDEO
+//                        )
+//                    )
+//                } else {
+//                    requestPermissionLauncher.launch(
+//                        arrayOf(
+//                            Manifest.permission.READ_EXTERNAL_STORAGE,
+//                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+//                        )
+//                    )
+//
+//                }
+//            }
+            // No need to ask for permission because new Android data access changes, unless it is video or audio
+            initViews()
         }
     }
 
