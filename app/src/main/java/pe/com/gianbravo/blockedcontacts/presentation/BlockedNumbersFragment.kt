@@ -22,12 +22,13 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import pe.com.gianbravo.blockedcontacts.presentation.view.touchHelper.SimpleItemTouchHelperCallback
-import kotlinx.android.synthetic.main.fragment_blocked_numbers.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pe.com.gianbravo.blockedcontacts.R
+import pe.com.gianbravo.blockedcontacts.databinding.DialogHowToUseBinding
+import pe.com.gianbravo.blockedcontacts.databinding.FragmentBlockedNumbersBinding
 import pe.com.gianbravo.blockedcontacts.domain.BlacklistContacts
 import pe.com.gianbravo.blockedcontacts.presentation.adapter.RvNumberListAdapter
 import pe.com.gianbravo.blockedcontacts.presentation.base.BaseFragment
@@ -48,6 +49,8 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
         get() = Dispatchers.IO
     private lateinit var rvAdapter: RvNumberListAdapter
     private lateinit var callback: SimpleItemTouchHelperCallback
+    private var _binding: FragmentBlockedNumbersBinding? = null
+    private val binding get() = _binding!!
 
     private val fileType = "application/json"
 
@@ -152,7 +155,8 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_blocked_numbers, container, false)
+        _binding = FragmentBlockedNumbersBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -166,21 +170,21 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
     private fun registerObservers() {}
 
     private fun registerListeners() {
-        buttonBlock.setOnClickListener {
-            val number = etNumber.text.toString()
+        binding.buttonBlock.setOnClickListener {
+            val number = binding.etNumber.text.toString()
             putNumberOnBlocked(number)
         }
 
-        buttonRemove.setOnClickListener {
-            val number = etNumber.text.toString()
+        binding.buttonRemove.setOnClickListener {
+            val number = binding.etNumber.text.toString()
             removeNumberFromBlocker(number)
             refreshList()
         }
 
-        buttonExport.setOnClickListener {
+        binding.buttonExport.setOnClickListener {
             exportBlacklist()
         }
-        buttonImport.setOnClickListener {
+        binding.buttonImport.setOnClickListener {
             importBlacklist()
         }
     }
@@ -195,7 +199,7 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
             context,
             LinearLayoutManager.VERTICAL, false
         )
-        rvList.layoutManager = linearLayoutManager
+        binding.rvList.layoutManager = linearLayoutManager
         rvAdapter =
             RvNumberListAdapter(
                 context,
@@ -207,7 +211,7 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
                         buttonView: CompoundButton?,
                         isChecked: Boolean
                     ) {
-                        etNumber.setText(item)
+                        binding.etNumber.setText(item)
                     }
                 },
                 object :
@@ -233,11 +237,11 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
 
                     }
                 })
-        rvList.adapter = rvAdapter
+        binding.rvList.adapter = rvAdapter
 
         callback = SimpleItemTouchHelperCallback(rvAdapter)
         val touchHelper = ItemTouchHelper(callback)
-        touchHelper.attachToRecyclerView(rvList)
+        touchHelper.attachToRecyclerView(binding.rvList)
 
         refreshList()
     }
@@ -305,7 +309,7 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
             )
             if (!isFromMultiple) {
                 context?.toast(getString(R.string.text_added_number))
-                etNumber.setText("")
+                binding.etNumber.setText("")
                 refreshList()
             }
         } else
@@ -313,7 +317,7 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
     }
 
     private fun refreshList() {
-        tvCount.text = rvAdapter.loadData(getBlocked()).toString()
+        binding.tvCount.text = rvAdapter.loadData(getBlocked()).toString()
     }
 
     private fun getBlocked(): ArrayList<String> {
@@ -357,7 +361,7 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
                     )
                 uri?.let { it1 -> context?.contentResolver?.delete(it1, null, null) }
                 context?.toast(getString(R.string.text_removed_number))
-                etNumber.setText("")
+                binding.etNumber.setText("")
             }
         }
     }

@@ -1,6 +1,5 @@
 package pe.com.gianbravo.blockedcontacts.presentation
 
-import android.Manifest
 import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
@@ -15,33 +14,40 @@ import android.telecom.TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.toolbar.*
+import androidx.navigation.findNavController
 import org.koin.android.ext.android.inject
 import pe.com.gianbravo.blockedcontacts.R
 import pe.com.gianbravo.blockedcontacts.data.source.UserRepository
+import pe.com.gianbravo.blockedcontacts.databinding.ActivityCallBinding
+import pe.com.gianbravo.blockedcontacts.databinding.ActivityDialerBinding
+import pe.com.gianbravo.blockedcontacts.databinding.ToolbarBinding
 import pe.com.gianbravo.blockedcontacts.presentation.base.BaseActivity
 import pe.com.gianbravo.blockedcontacts.presentation.dialog.HowToUseDialogFragment
 import pe.com.gianbravo.blockedcontacts.utils.DialogUtil
-import pe.com.gianbravo.blockedcontacts.utils.Utils
 
 
 class DialerActivity : BaseActivity() {
     private val userRepository: UserRepository by inject()
+    private lateinit var binding: ActivityDialerBinding
+    private lateinit var toolbarBinding: ToolbarBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dialer)
-        setSupportActionBar(toolbar)
+        binding = ActivityDialerBinding.inflate(layoutInflater)
+        toolbarBinding = binding.toolbar
+        setSupportActionBar(toolbarBinding.toolbar)
         supportActionBar?.setDisplayShowHomeEnabled(true)
     }
 
     override fun onResume() {
         super.onResume()
+
         if (userRepository.isFirstTime == true || userRepository.isFirstTime == null) {
             showHowToDialog()
             userRepository.isFirstTime = false
         } else
             offerReplacingDefaultDialer()
+
     }
 
     private val defaultCallerRegisterForResult =
@@ -121,10 +127,7 @@ class DialerActivity : BaseActivity() {
     }
 
     private fun initViews() {
-        replaceFragment(
-            BlockedNumbersFragment(),
-            R.id.catalog
-        )
+        setContentView(binding.root)
     }
 
     override fun onRequestPermissionsResult(
@@ -182,7 +185,8 @@ class DialerActivity : BaseActivity() {
     }
 
     override fun onBackPressed() {
-        DialogUtil.showDialogListener(this,
+		super.onBackPressed()
+		DialogUtil.showDialogListener(this,
             getString(R.string.exit_app),
             true,
             closeEnabled = true,

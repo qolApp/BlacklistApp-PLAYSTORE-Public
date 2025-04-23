@@ -6,8 +6,8 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.DialogFragment
 import com.sonu.libraries.materialstepper.OnLastStepNextListener
-import kotlinx.android.synthetic.main.dialog_how_to_use.*
 import pe.com.gianbravo.blockedcontacts.R
+import pe.com.gianbravo.blockedcontacts.databinding.DialogHowToUseBinding
 
 /**
  * @author Giancarlo Bravo Anlas
@@ -15,6 +15,9 @@ import pe.com.gianbravo.blockedcontacts.R
  */
 class HowToUseDialogFragment : DialogFragment() {
     private var listener: DialogListener? = null
+
+    private var _binding: DialogHowToUseBinding? = null
+    private val binding get() = _binding!!
 
     interface DialogListener {
         fun onDismiss()
@@ -43,7 +46,8 @@ class HowToUseDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.dialog_how_to_use, null, false)
+        _binding = DialogHowToUseBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -72,7 +76,7 @@ class HowToUseDialogFragment : DialogFragment() {
 
     private fun setup() {
         //adding fragment manager for ViewPager Adapter
-        materialStepper?.let {
+        binding.materialStepper?.let {
             it.fragmentManager = childFragmentManager
             //adding steps
             it.addStep(InformationFragment0(getString(R.string.title_information_0)))

@@ -9,8 +9,8 @@ import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import gianca.mostradorropa.friendssApp.touchHelper.ItemTouchHelperAdapter
-import kotlinx.android.synthetic.main.item_number.view.*
 import pe.com.gianbravo.blockedcontacts.R
+import pe.com.gianbravo.blockedcontacts.databinding.ItemNumberBinding
 
 /**
  * @author Giancarlo Bravo Anlas
@@ -61,10 +61,9 @@ class RvNumberListAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataClientViewHolder {
-        val view: View = layoutInflater.inflate(R.layout.item_number, parent, false)
-        return DataClientViewHolder(
-            view
-        )
+        val binding = ItemNumberBinding
+            .inflate(LayoutInflater.from(parent.context), parent, false)
+        return DataClientViewHolder(binding)
     }
 
     override fun getItemCount(): Int {
@@ -116,10 +115,10 @@ class RvNumberListAdapter(
         }
     }
 
-    class DataClientViewHolder(view: View) :
-        RecyclerView.ViewHolder(view) {
-        val tvNumber = view.tvNumber
-        val layout = view.layout
+    class DataClientViewHolder(val binding: ItemNumberBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        val tvNumber = binding.tvNumber
+        val layout = binding.layout
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
