@@ -5,19 +5,20 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
 import android.provider.BlockedNumberContract
 import android.view.*
 import android.widget.CompoundButton
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
@@ -26,16 +27,19 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.android.ext.android.inject
 import pe.com.gianbravo.blockedcontacts.R
-import pe.com.gianbravo.blockedcontacts.databinding.DialogHowToUseBinding
+import pe.com.gianbravo.blockedcontacts.data.CustomResult
 import pe.com.gianbravo.blockedcontacts.databinding.FragmentBlockedNumbersBinding
 import pe.com.gianbravo.blockedcontacts.domain.BlacklistContacts
+import pe.com.gianbravo.blockedcontacts.domain.interactor.FileInteractor
 import pe.com.gianbravo.blockedcontacts.presentation.adapter.RvNumberListAdapter
 import pe.com.gianbravo.blockedcontacts.presentation.base.BaseFragment
 import pe.com.gianbravo.blockedcontacts.presentation.dialog.HowToUseDialogFragment
 import pe.com.gianbravo.blockedcontacts.toast
 import pe.com.gianbravo.blockedcontacts.utils.Constants.FILE_NAME
 import pe.com.gianbravo.blockedcontacts.utils.DialogUtil
+import pe.com.gianbravo.blockedcontacts.utils.FileUtils.Companion.writeFile
 import java.io.*
 import kotlin.coroutines.CoroutineContext
 
@@ -84,9 +88,7 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
                         Gson().fromJson(stringBuilder.toString(), BlacklistContacts::class.java)
 
                     // load numbers to blacklist
-                    blacklistContacts.list.forEach {
-                        putNumberOnBlocked(it, true)
-                    }
+                    addBlockedNumbers(context, blacklistContacts.list)
 
                     withContext(Dispatchers.Main) {
                         if (fileFound) {
@@ -172,7 +174,12 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
     private fun registerListeners() {
         binding.buttonBlock.setOnClickListener {
             val number = binding.etNumber.text.toString()
-            putNumberOnBlocked(number)
+            putNumberOnBlocked(
+                number = number, context = context, onSuccess = {
+                    binding.etNumber.setText("")
+                    refreshList()
+                }
+            )
         }
 
         binding.buttonRemove.setOnClickListener {
@@ -184,9 +191,19 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
         binding.buttonExport.setOnClickListener {
             exportBlacklist()
         }
+
+        binding.buttonExportRemote.setOnClickListener {
+            exportRemoteBlacklist()
+        }
+
         binding.buttonImport.setOnClickListener {
             importBlacklist()
         }
+
+        binding.buttonImportRemote.setOnClickListener {
+            importRemoteBlacklist()
+        }
+
     }
 
     private fun setupViews() {
@@ -296,58 +313,11 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    private fun putNumberOnBlocked(
-        number: String,
-        isFromMultiple: Boolean = false
-    ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val values = ContentValues()
-            values.put(BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER, number)
-            context?.contentResolver?.insert(
-                BlockedNumberContract.BlockedNumbers.CONTENT_URI,
-                values
-            )
-            if (!isFromMultiple) {
-                context?.toast(getString(R.string.text_added_number))
-                binding.etNumber.setText("")
-                refreshList()
-            }
-        } else
-            context?.toast(getString(R.string.text_not_supported))
-    }
-
     private fun refreshList() {
-        binding.tvCount.text = rvAdapter.loadData(getBlocked()).toString()
+        binding.tvCount.text = rvAdapter.loadData(getBlocked(context)).toString()
     }
 
-    private fun getBlocked(): ArrayList<String> {
-        val list = arrayListOf<String>()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            context?.contentResolver?.let {
-                val record: Cursor? =
-                    it.query(
-                        BlockedNumberContract.BlockedNumbers.CONTENT_URI, arrayOf(
-                            BlockedNumberContract.BlockedNumbers.COLUMN_ID,
-                            BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER,
-                            BlockedNumberContract.BlockedNumbers.COLUMN_E164_NUMBER
-                        ), null, null, null
-                    )
 
-                if (record != null && record.count != 0) {
-                    if (record.moveToFirst()) {
-                        do {
-                            val blockNumber =
-                                record.getString(record.getColumnIndex(BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER))
-                            list.add(blockNumber)
-                        } while (record.moveToNext())
-                    }
-                    record.close()
-                }
-            }
-        }
-        list.sort()
-        return list
-    }
 
     private fun removeNumberFromBlocker(number: String?) {
         number?.let {
@@ -371,33 +341,53 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
         this.createRegisterForResult.launch(FILE_NAME)
     }
 
+    private val fileInteractor: FileInteractor by inject()
+
+    private fun exportRemoteBlacklist() {
+        showFullScreenLoader()
+        lifecycleScope.launch {
+            val result: CustomResult<String> = withContext(Dispatchers.IO) {
+                fileInteractor.uploadBlacklist()
+            }
+            when (result) {
+                is CustomResult.Success -> {
+                    dismissFullScreenLoader()
+                    context?.toast(getString(R.string.text_remote_export_success), Toast.LENGTH_LONG )
+                }
+                is CustomResult.Failure -> {
+                    dismissFullScreenLoader()
+                    context?.toast(result.exception.message.toString(), length = Toast.LENGTH_LONG )
+                }
+            }
+        }
+    }
+
+    private fun importRemoteBlacklist() {
+        showFullScreenLoader()
+        lifecycleScope.launch {
+            val result: CustomResult<List<String>> = withContext(Dispatchers.IO) {
+                fileInteractor.getBlacklistContacts()
+            }
+            when (result) {
+                is CustomResult.Success -> {
+                    addBlockedNumbers(context, result.data)
+                    refreshList()
+                    dismissFullScreenLoader()
+
+                    context?.toast(getString(R.string.text_remote_import_success), Toast.LENGTH_LONG )
+                }
+                is CustomResult.Failure -> {
+                    dismissFullScreenLoader()
+                    context?.toast(result.exception.message.toString(), length = Toast.LENGTH_LONG )
+                }
+            }
+        }
+    }
+
     private fun importBlacklist() {
         this.openRegisterForResult.launch(arrayOf(fileType))
     }
 
-    private fun writeFile(context: Context, outputJson: String, uri: Uri): Boolean {
-        var bos: BufferedOutputStream? = null
-        // Now read the file
-        try {
-            bos = BufferedOutputStream(context.contentResolver.openOutputStream(uri))
-            bos.write(outputJson.toByteArray())
-            bos.close()
-
-        } catch (e: Exception) {
-            // Notify User of fail
-            context.toast(getString(R.string.text_removed_number))
-            return false
-        } finally {
-            try {
-                if (bos != null) {
-                    bos.flush()
-                    bos.close()
-                }
-            } catch (ignored: Exception) {
-            }
-        }
-        return true
-    }
 
     private fun showHowToDialog() {
         val dialogModifyEntriesFragment =
@@ -412,5 +402,66 @@ class BlockedNumbersFragment : BaseFragment(), CoroutineScope{
     private fun showChangeDefaultDialerSelector() {
         if (activity is DialerActivity)
             (activity as DialerActivity).showChangeDefaultDialerSelector(true)
+    }
+
+    companion object {
+        fun addBlockedNumbers(context: Context?, list: List<String>?) {
+            list?.forEach {
+                putNumberOnBlocked(
+                    number = it, isFromMultiple = true, context = context, onSuccess = {
+                    }
+                )
+            }
+        }
+
+        fun putNumberOnBlocked(
+            number: String,
+            isFromMultiple: Boolean = false,
+            context: Context?,
+            onSuccess: ()-> Unit
+        ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val values = ContentValues()
+                values.put(BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER, number)
+                context?.contentResolver?.insert(
+                    BlockedNumberContract.BlockedNumbers.CONTENT_URI,
+                    values
+                )
+                if (!isFromMultiple) {
+                    context?.toast(context.getString(R.string.text_added_number))
+                    onSuccess()
+                }
+            } else
+                context?.toast(context.getString(R.string.text_not_supported))
+        }
+
+        fun getBlocked(context: Context?): ArrayList<String> {
+            val list = arrayListOf<String>()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                context?.contentResolver?.let {
+                    val record: Cursor? =
+                        it.query(
+                            BlockedNumberContract.BlockedNumbers.CONTENT_URI, arrayOf(
+                                BlockedNumberContract.BlockedNumbers.COLUMN_ID,
+                                BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER,
+                                BlockedNumberContract.BlockedNumbers.COLUMN_E164_NUMBER
+                            ), null, null, null
+                        )
+
+                    if (record != null && record.count != 0) {
+                        if (record.moveToFirst()) {
+                            do {
+                                val blockNumber =
+                                    record.getString(record.getColumnIndex(BlockedNumberContract.BlockedNumbers.COLUMN_ORIGINAL_NUMBER))
+                                list.add(blockNumber)
+                            } while (record.moveToNext())
+                        }
+                        record.close()
+                    }
+                }
+            }
+            list.sort()
+            return list
+        }
     }
 }

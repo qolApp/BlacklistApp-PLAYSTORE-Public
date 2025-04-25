@@ -48,20 +48,14 @@ android {
 			signingConfig = signingConfigs.getByName("release")
 			isDebuggable = true
 			applicationIdSuffix = ".prod"
-			buildConfigField(
-				"String",
-				"SHARED_PREFERENCE_NAME",
-				"\"SHARED_PREFERENCE_NAME\""
-			)
+			buildConfigField("String", "SHARED_PREFERENCE_NAME", "\"SHARED_PREFERENCE_NAME\"")
+			buildConfigField("String", "ENV", "\"production\"")
 		}
 
 		getByName("debug") {
 			resValue("string", "app_name", "BlacklistApp Alpha")
-			buildConfigField(
-				"String",
-				"SHARED_PREFERENCE_NAME",
-				"\"SHARED_PREFERENCE_NAME_DEBUG\""
-			)
+			buildConfigField("String", "SHARED_PREFERENCE_NAME", "\"SHARED_PREFERENCE_NAME_DEBUG\"")
+			buildConfigField("String", "ENV", "\"development\"")
 			applicationIdSuffix = ".alfa"
 			versionNameSuffix = "-debug"
 			isDebuggable = true
@@ -160,6 +154,13 @@ dependencies {
 	implementation(libs.koin.android)
 
 	implementation("io.reactivex.rxjava2:rxandroid:2.0.2")
+
+	//Retrofit
+	implementation(libs.retrofit)
+	implementation(libs.retrofit.converterGson)
+	implementation(libs.okhttp3.loggingInterceptor)
+	implementation(libs.commonsLang3)
+	implementation(libs.commonsIo)
 
 
 	testImplementation(libs.junit)

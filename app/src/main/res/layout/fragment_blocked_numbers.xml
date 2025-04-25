@@ -8,19 +8,46 @@
     android:layout_marginHorizontal="15dp"
     tools:context="pe.com.gianbravo.blockedcontacts.presentation.DialerActivity"
     >
-
     <Button
-        android:id="@+id/buttonExport"
+        android:id="@+id/buttonExportRemote"
         style="@style/BlacklistAppButton.Red"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         android:textSize="@dimen/dimenTitleXXS"
-        android:text="@string/text_export"
+        android:text="@string/text_export_remote"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/buttonImport"
         app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <Button
+        android:id="@+id/buttonExport"
+        style="@style/BlacklistAppButton.Blue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:textSize="@dimen/dimenTitleXXS"
+        android:text="@string/text_export"
+        app:layout_constraintEnd_toStartOf="@+id/buttonExportRemote"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <Button
+        android:id="@+id/buttonImportRemote"
+        style="@style/BlacklistAppButton.Red"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:textSize="@dimen/dimenTitleXXS"
+        android:text="@string/text_remote_import"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/buttonImport"
+        app:layout_constraintTop_toBottomOf="@+id/buttonExport"
         />
 
     <Button
@@ -31,10 +58,10 @@
         android:layout_marginTop="40dp"
         android:textSize="@dimen/dimenTitleXXS"
         android:text="@string/text_import"
-        app:layout_constraintEnd_toStartOf="@+id/buttonExport"
+        app:layout_constraintEnd_toStartOf="@+id/buttonImportRemote"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonExport"
         />
 
     <androidx.constraintlayout.widget.ConstraintLayout

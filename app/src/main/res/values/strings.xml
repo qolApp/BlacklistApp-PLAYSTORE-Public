@@ -6,6 +6,7 @@
     <string name="text_list">Blacklisted contacts</string>
     <string name="text_import">Import</string>
     <string name="text_export">Export</string>
+    <string name="text_export_remote">Remote Export</string>
 
     <string name="text_yes">Yes</string>
     <string name="text_no">No</string>
@@ -69,5 +70,8 @@
 
     <string name="exit_app">Do you want to exit?</string>
     <string name="menu_search">Search</string>
+    <string name="text_remote_export_success">Success exporting the blacklist to the remote server</string>
+    <string name="text_remote_import">Remote Import</string>
+    <string name="text_remote_import_success">Success importing blacklist contacts from remote server</string>
 
 </resources>
