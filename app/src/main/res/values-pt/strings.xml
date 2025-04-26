@@ -71,5 +71,11 @@
     <string name="text_remote_export_success">Success exporting the blacklist to the remote server</string>
     <string name="text_remote_import">Remote Import</string>
     <string name="text_remote_import_success">Success importing blacklist contacts from remote server</string>
+    <string name="close_dialog">Close dialog</string>
+    <string name="error_connection_server">Connection error</string>
+    <string name="delete_item_title">Deleting item!</string>
+    <string name="delete_item_message">Are you sure to delete the item %s ?</string>
+    <string name="button_ok">Accept</string>
+    <string name="button_cancel">Cancel</string>
 
 </resources>

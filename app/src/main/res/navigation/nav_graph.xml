@@ -8,5 +8,18 @@
         android:id="@+id/nav_blocked"
         android:name="pe.com.gianbravo.blockedcontacts.presentation.BlockedNumbersFragment"
         android:label="BlockedNumbersFragment">
+        <action
+            android:id="@+id/toFileDialog"
+            app:destination="@id/dialog_file" />
     </fragment>
+    <dialog
+        android:id="@+id/dialog_file"
+        android:name="pe.com.gianbravo.blockedcontacts.presentation.FileOptionsDialogFragment"
+        android:label="FileOptionsDialogFragment">
+
+        <argument
+            android:name="is_import"
+            android:defaultValue="true"
+            app:argType="boolean" />
+    </dialog>
 </navigation>

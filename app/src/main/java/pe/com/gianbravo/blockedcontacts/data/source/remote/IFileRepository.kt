@@ -1,7 +1,7 @@
 package pe.com.gianbravo.blockedcontacts.data.source.remote
 
+import android.net.Uri
 import pe.com.gianbravo.blockedcontacts.data.CustomResult
-import pe.com.gianbravo.blockedcontacts.data.source.remote.networking.BlackListData
 
 /**
  * @author Giancarlo Bravo Anlas
@@ -9,5 +9,8 @@ import pe.com.gianbravo.blockedcontacts.data.source.remote.networking.BlackListD
  */
 interface IFileRepository {
 	suspend fun uploadBlacklist(): CustomResult<String>
-	suspend fun getBlacklistContacts(): CustomResult<BlackListData>
+	suspend fun getBlacklistContacts(): CustomResult<Any>
+	suspend fun importFromFile(uri: Uri?) : CustomResult<String>
+	suspend fun exportToFile(uri: Uri?) : CustomResult<String>
+
 }

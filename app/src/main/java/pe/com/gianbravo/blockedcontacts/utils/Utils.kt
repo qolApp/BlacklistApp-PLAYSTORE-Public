@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
+import java.util.Calendar
 
 /**
  * @author Giancarlo Bravo Anlas
@@ -32,5 +33,15 @@ object Utils {
             context,
             permission
         ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun stringToCalendarHour(): String {
+        val calendar = Calendar.getInstance()
+        return (calendar[Calendar.DAY_OF_MONTH].toString() + "/"
+                + (calendar[Calendar.MONTH] + 1) + "/"
+                + calendar[Calendar.YEAR] + " " +
+                calendar[Calendar.HOUR_OF_DAY] + ":"
+                + calendar[Calendar.MINUTE] + ":"
+                + calendar[Calendar.SECOND])
     }
 }

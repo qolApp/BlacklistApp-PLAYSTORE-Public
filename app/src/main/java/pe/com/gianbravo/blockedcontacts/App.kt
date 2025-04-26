@@ -5,6 +5,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import pe.com.gianbravo.blockedcontacts.data.source.remote.repository.repositoryModule
 import pe.com.gianbravo.blockedcontacts.domain.interactor.interactorModule
+import pe.com.gianbravo.blockedcontacts.presentation.presentationModule
 
 import timber.log.Timber
 
@@ -18,7 +19,8 @@ class App : Application() {
             modules(
                 dataModule,
                 interactorModule,
-                repositoryModule
+                repositoryModule,
+                presentationModule
             )
         }
     }

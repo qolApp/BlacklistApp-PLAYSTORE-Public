@@ -1,7 +1,7 @@
-package pe.com.gianbravo.blockedcontacts.presentation.base
+package pe.com.gianbravo.blockedcontacts.presentation.common.base
 
 import androidx.fragment.app.Fragment
-import pe.com.gianbravo.blockedcontacts.presentation.base.BaseActivity
+import pe.com.gianbravo.blockedcontacts.presentation.common.base.BaseActivity
 
 /**
  * @author Giancarlo Bravo Anlas

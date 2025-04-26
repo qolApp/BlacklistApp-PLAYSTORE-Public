@@ -1,4 +1,4 @@
-package pe.com.gianbravo.blockedcontacts.presentation.base
+package pe.com.gianbravo.blockedcontacts.presentation.common.base
 
 import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
